@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub 文件加速</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 700px;
+            background-color: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .description {
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+        
+        .proxy-selector {
+            margin-bottom: 25px;
+            text-align: left;
+        }
+        
+        .proxy-selector label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #444;
+        }
+        
+        .proxy-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .proxy-btn {
+            flex: 1;
+            min-width: 150px;
+            padding: 12px;
+            background-color: #f5f7fa;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            text-align: center;
+        }
+        
+        .proxy-btn.active {
+            background-color: #6e8efb;
+            color: white;
+            border-color: #6e8efb;
+        }
+        
+        .input-group {
+            margin-bottom: 30px;
+            text-align: left;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #444;
+        }
+        
+        input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        input:focus {
+            border-color: #6e8efb;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(110, 142, 251, 0.2);
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+        
+        button {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .convert-btn {
+            background-color: #6e8efb;
+            color: white;
+        }
+        
+        .convert-btn:hover {
+            background-color: #5a7dfa;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(110, 142, 251, 0.4);
+        }
+        
+        .clear-btn {
+            background-color: #f5f7fa;
+            color: #666;
+        }
+        
+        .clear-btn:hover {
+            background-color: #eaeef4;
+        }
+        
+        .result-container {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: left;
+            display: none;
+        }
+        
+        .result-container.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .result-label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+        
+        .result-link {
+            word-break: break-all;
+            font-size: 16px;
+            color: #6e8efb;
+            font-weight: 500;
+            text-decoration: none;
+        }
+        
+        .result-link:hover {
+            text-decoration: underline;
+        }
+        
+        .copy-btn {
+            margin-top: 12px;
+            background-color: #28a745;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .copy-btn:hover {
+            background-color: #218838;
+        }
+        
+        .examples {
+            margin-top: 30px;
+            text-align: left;
+            background-color: #f8f9fa;
+            padding: 16px;
+            border-radius: 8px;
+        }
+        
+        .examples h3 {
+            font-size: 16px;
+            margin-bottom: 10px;
+            color: #444;
+        }
+        
+        .examples ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        
+        .examples li {
+            padding: 6px 0;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .examples li:before {
+            content: "• ";
+            color: #6e8efb;
+            font-weight: bold;
+        }
+        
+        footer {
+            color: rgba(255, 255, 255, 0.8);
+            text-align: center;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 25px;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            .proxy-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>GitHub 文件加速工具</h1>
+        <p class="description">输入GitHub文件链接，选择加速节点，快速获取加速后的下载链接</p>
+        
+        <div class="proxy-selector">
+            <label>选择加速节点：</label>
+            <div class="proxy-buttons">
+                <div class="proxy-btn active" data-proxy="https://fandai-01.legspcpd.qzz.io/">
+                    默认节点 (fandai-01)
+                </div>
+                <div class="proxy-btn" data-proxy="https://edge.fd.legspcpd.dpdns.org/">
+                    EdgeOne 节点
+                </div>
+                <div class="proxy-btn" data-proxy="https://git.fd.legspcpd.qzz.io/">
+                    GitHub 节点
+                </div>
+            </div>
+        </div>
+        
+        <div class="input-group">
+            <label for="github-url">输入 GitHub 文件链接：</label>
+            <input type="text" id="github-url" placeholder="例如：https://github.com/username/repository/raw/main/file.zip" autocomplete="off">
+        </div>
+        
+        <div class="button-group">
+            <button class="convert-btn" id="convert-btn">生成加速链接</button>
+            <button class="clear-btn" id="clear-btn">清空</button>
+        </div>
+        
+        <div class="result-container" id="result-container">
+            <div class="result-label">加速后的链接：</div>
+            <a href="#" class="result-link" id="result-link" target="_blank"></a>
+            <button class="copy-btn" id="copy-btn">复制链接</button>
+        </div>
+        
+        <div class="examples">
+            <h3>输入示例：</h3>
+            <ul>
+                <li>https://github.com/username/repository/raw/main/file.zip</li>
+                <li>https://raw.githubusercontent.com/user/repo/branch/file</li>
+                <li>https://github.com/username/repository/releases/download/tag/file.exe</li>
+            </ul>
+        </div>
+    </div>
+    
+    <footer>
+        By LegspCpd
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const githubUrlInput = document.getElementById('github-url');
+            const convertBtn = document.getElementById('convert-btn');
+            const clearBtn = document.getElementById('clear-btn');
+            const resultContainer = document.getElementById('result-container');
+            const resultLink = document.getElementById('result-link');
+            const copyBtn = document.getElementById('copy-btn');
+            const proxyButtons = document.querySelectorAll('.proxy-btn');
+            
+            let selectedProxy = 'https://fandai-01.legspcpd.qzz.io/';
+            
+            // 选择代理节点
+            proxyButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    proxyButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    selectedProxy = this.getAttribute('data-proxy');
+                });
+            });
+            
+            // 转换链接
+            function convertUrl() {
+                let inputUrl = githubUrlInput.value.trim();
+                
+                if (!inputUrl) {
+                    alert('请输入GitHub文件链接');
+                    return;
+                }
+                
+                // 提取GitHub路径部分
+                let githubPath = '';
+                
+                // 处理不同的GitHub链接格式
+                if (inputUrl.includes('github.com')) {
+                    // 处理 raw.githubusercontent.com 链接
+                    if (inputUrl.includes('raw.githubusercontent.com')) {
+                        githubPath = inputUrl.replace(/^https?:\/\/raw\.githubusercontent\.com\//, '');
+                    }
+                    // 处理 github.com/.../raw/... 链接
+                    else if (inputUrl.includes('/raw/')) {
+                        githubPath = inputUrl.replace(/^https?:\/\/github\.com\//, '');
+                    }
+                    // 处理 releases 下载链接
+                    else if (inputUrl.includes('/releases/download/')) {
+                        githubPath = inputUrl.replace(/^https?:\/\/github\.com\//, '');
+                    }
+                    // 其他情况，直接提取github.com之后的部分
+                    else {
+                        githubPath = inputUrl.replace(/^https?:\/\/github\.com\//, '');
+                    }
+                } else {
+                    alert('请输入有效的GitHub文件链接');
+                    return;
+                }
+                
+                // 构建加速链接
+                const acceleratedUrl = selectedProxy + githubPath;
+                
+                // 显示结果
+                resultLink.textContent = acceleratedUrl;
+                resultLink.href = acceleratedUrl;
+                resultContainer.classList.add('show');
+            }
+            
+            // 清空输入
+            function clearInput() {
+                githubUrlInput.value = '';
+                resultContainer.classList.remove('show');
+                githubUrlInput.focus();
+            }
+            
+            // 复制链接
+            function copyToClipboard() {
+                const textArea = document.createElement('textarea');
+                textArea.value = resultLink.textContent;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                
+                // 显示复制成功反馈
+                const originalText = copyBtn.textContent;
+                copyBtn.textContent = '已复制!';
+                copyBtn.style.backgroundColor = '#218838';
+                
+                setTimeout(() => {
+                    copyBtn.textContent = originalText;
+                    copyBtn.style.backgroundColor = '#28a745';
+                }, 2000);
+            }
+            
+            // 事件监听
+            convertBtn.addEventListener('click', convertUrl);
+            clearBtn.addEventListener('click', clearInput);
+            copyBtn.addEventListener('click', copyToClipboard);
+            
+            // 支持回车键转换
+            githubUrlInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    convertUrl();
+                }
+            });
+            
+            // 自动聚焦到输入框
+            githubUrlInput.focus();
+        });
+    </script>
+</body>
+</html>
